@@ -1,20 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Cloud Computing</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Computing | Mi primer sistema Cloud</title>
+    
 </head>
 
 <body>
 
-<h1>Cloud Computing</h1>
+<header>
+    <span class="logo">&#9729;</span>
+    <span class="brand">Cloud Computing</span>
+</header>
 
-<h2>Mi primer sistema Cloud</h2>
+<main>
+    <section class="card">
+        <h1>Mi primer sistema Cloud</h1>
+        <h2>Bienvenido</h2>
+        <p>
+            Sistema creado en la asignatura Computación en la Nube del
+            Instituto Profesional Santo Tomás.
+        </p>
+        <button type="button">Presione para ingresar al sistema</button>
+    </section>
+</main>
 
-<p>
-Sistema creado en la asignatura Computación en la Nube del Instituto Profesional Santo Tomás
-</p>
-
-<button>Precione para ingresar al sistema</button>
+<footer>
+    &copy; 2026 Instituto Profesional Santo Tomás &mdash; Computación en la Nube
+</footer>
 
 </body>
 </html>
+
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        header .logo {
+            font-size: 1.5rem;
+        }
+
+        header .brand {
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            padding: 3rem;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .card h1 {
+            color: #1e3c72;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card h2 {
+            color: #555;
+            font-size: 1.15rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+        }
+
+        .card p {
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .card button {
+            background-color: #2a5298;
+            color: #fff;
+            border: none;
+            padding: 0.85rem 2.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .card button:hover {
+            background-color: #1e3c72;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+    </style>
