@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario | Cloud Computing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="form-body">
+
+    <header>
+        <span class="brand">Cloud Computing</span>
+    </header>
+
+    <main>
+        <section class="card form-card">
+            <h1>Formulario de Opinión</h1>
+            <h2>¿Raphinha debería mantenerse como el 9 del Barça?</h2>
+
+            <form id="opinionForm">
+                <div class="form-group">
+                    <label for="id">ID</label>
+                    <input type="text" id="id" name="id" placeholder="Ej: 12345678-9" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nombre">Nombre de la persona</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required>
+                </div>
+
+                <div class="form-group">
+                    <label>¿Raphinha debe mantenerse como el 9?</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="eleccion" value="Si" required>
+                            <span class="radio-custom"></span>
+                            Sí, es el mejor
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="eleccion" value="No">
+                            <span class="radio-custom"></span>
+                            No, debe salir
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="motivo">Motivo</label>
+                    <textarea id="motivo" name="motivo" rows="4" placeholder="Explica tu opinión..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-secta">La secta es inevitable</button>
+            </form>
+
+            <div id="mensaje" class="mensaje-oculto"></div>
+
+            <a href="index.html" class="volver-link">Volver al inicio</a>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Instituto Profesional Santo Tomás &mdash; Computación en la Nube
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMuHX0poXiVeFpbWESF7Cq2vcDIpd1TQU",
+            authDomain: "cloudcomputing-5df45.firebaseapp.com",
+            projectId: "cloudcomputing-5df45",
+            storageBucket: "cloudcomputing-5df45.firebasestorage.app",
+            messagingSenderId: "335229660564",
+            appId: "1:335229660564:web:55c389fb811de4d0ab3381",
+            measurementId: "G-BRJJTJGVFV"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const form = document.getElementById('opinionForm');
+        const mensaje = document.getElementById('mensaje');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const datos = {
+                id: document.getElementById('id').value.trim(),
+                nombre: document.getElementById('nombre').value.trim(),
+                eleccion: document.querySelector('input[name="eleccion"]:checked').value,
+                motivo: document.getElementById('motivo').value.trim(),
+                fecha: new Date().toISOString()
+            };
+
+            try {
+                await db.collection('opiniones').add(datos);
+                mensaje.textContent = '¡Voto registrado correctamente! La secta lo aprueba.';
+                mensaje.className = 'mensaje-exito';
+                form.reset();
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                mensaje.textContent = 'Error al guardar. Verifica que Firestore esté habilitado.';
+                mensaje.className = 'mensaje-error';
+            }
+
+            setTimeout(() => {
+                mensaje.className = 'mensaje-oculto';
+            }, 4000);
+        });
+    </script>
+
+</body>
+</html>
