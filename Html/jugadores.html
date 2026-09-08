@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jugadores | Cloud Computing</title>
+    <link rel="stylesheet" href="../Css/style.css">
+</head>
+<body class="form-body">
+
+    <header>
+        <span class="brand">Cloud Computing</span>
+    </header>
+
+    <main>
+        <section class="card form-card" style="max-width: 860px;">
+            <h1>CRUD Jugadores del Barça</h1>
+            <h2>Alta, baja y modificación en Firestore</h2>
+
+            <form id="jugadorForm">
+                <input type="hidden" id="jugadorId">
+
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ej: Lamine Yamal" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="posicion">Posición</label>
+                    <input type="text" id="posicion" name="posicion" placeholder="Ej: Extremo derecho" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dorsal">Dorsal</label>
+                    <input type="text" id="dorsal" name="dorsal" placeholder="Ej: 19" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nacionalidad">Nacionalidad</label>
+                    <input type="text" id="nacionalidad" name="nacionalidad" placeholder="Ej: España" required>
+                </div>
+
+                <button type="submit" class="btn-secta" id="btnGuardar">Guardar jugador</button>
+            </form>
+
+            <div id="mensaje" class="mensaje-oculto"></div>
+
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+
+            <table id="tablaJugadores" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="background: #004D98; color: #fff;">
+                        <th style="padding: 0.6rem; text-align: left;">Nombre</th>
+                        <th style="padding: 0.6rem; text-align: left;">Posición</th>
+                        <th style="padding: 0.6rem; text-align: left;">Dorsal</th>
+                        <th style="padding: 0.6rem; text-align: left;">Nacionalidad</th>
+                        <th style="padding: 0.6rem; text-align: left;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <tr>
+                        <td colspan="5" style="padding: 1rem; text-align: center; color: #888;">
+                            Cargando jugadores...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <a href="index.html" class="volver-link">Volver al inicio</a>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Instituto Profesional Santo Tomás &mdash; Computación en la Nube
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMuHX0poXiVeFpbWESF7Cq2vcDIpd1TQU",
+            authDomain: "cloudcomputing-5df45.firebaseapp.com",
+            projectId: "cloudcomputing-5df45",
+            storageBucket: "cloudcomputing-5df45.firebasestorage.app",
+            messagingSenderId: "335229660564",
+            appId: "1:335229660564:web:55c389fb811de4d0ab3381",
+            measurementId: "G-BRJJTJGVFV"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const coleccion = db.collection('jugadores');
+
+        const form = document.getElementById('jugadorForm');
+        const mensaje = document.getElementById('mensaje');
+        const cuerpo = document.getElementById('cuerpoTabla');
+
+        function mostrarMensaje(texto, tipo) {
+            mensaje.textContent = texto;
+            mensaje.className = tipo;
+            setTimeout(() => { mensaje.className = 'mensaje-oculto'; }, 4000);
+        }
+
+        async function cargarJugadores() {
+            try {
+                const snap = await coleccion.orderBy('nombre').get();
+                cuerpo.innerHTML = '';
+                if (snap.empty) {
+                    cuerpo.innerHTML = '<tr><td colspan="5" style="padding:1rem;text-align:center;color:#888;">Sin jugadores registrados</td></tr>';
+                    return;
+                }
+                snap.forEach(doc => {
+                    const j = doc.data();
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td style="padding:0.6rem;border-bottom:1px solid #eee;">${esc(j.nombre)}</td>
+                        <td style="padding:0.6rem;border-bottom:1px solid #eee;">${esc(j.posicion)}</td>
+                        <td style="padding:0.6rem;border-bottom:1px solid #eee;">${esc(j.dorsal)}</td>
+                        <td style="padding:0.6rem;border-bottom:1px solid #eee;">${esc(j.nacionalidad)}</td>
+                        <td style="padding:0.6rem;border-bottom:1px solid #eee;">
+                            <button type="button" onclick="editarJugador('${doc.id}')">Editar</button>
+                            <button type="button" onclick="borrarJugador('${doc.id}')" style="background:#A50044;">Borrar</button>
+                        </td>`;
+                    cuerpo.appendChild(fila);
+                });
+            } catch (error) {
+                console.error(error);
+                cuerpo.innerHTML = '<tr><td colspan="5" style="padding:1rem;text-align:center;color:#d93025;">Error al cargar. Revisa Firestore.</td></tr>';
+            }
+        }
+
+        function esc(texto) {
+            return String(texto).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const datos = {
+                nombre: document.getElementById('nombre').value.trim(),
+                posicion: document.getElementById('posicion').value.trim(),
+                dorsal: document.getElementById('dorsal').value.trim(),
+                nacionalidad: document.getElementById('nacionalidad').value.trim()
+            };
+
+            const id = document.getElementById('jugadorId').value;
+
+            try {
+                if (id) {
+                    await coleccion.doc(id).update(datos);
+                    mostrarMensaje('Jugador actualizado correctamente.', 'mensaje-exito');
+                } else {
+                    await coleccion.add(datos);
+                    mostrarMensaje('Jugador agregado correctamente.', 'mensaje-exito');
+                }
+                form.reset();
+                document.getElementById('jugadorId').value = '';
+                document.getElementById('btnGuardar').textContent = 'Guardar jugador';
+                cargarJugadores();
+            } catch (error) {
+                console.error(error);
+                mostrarMensaje('Error al guardar. Verifica Firestore.', 'mensaje-error');
+            }
+        });
+
+        window.editarJugador = async function(id) {
+            try {
+                const doc = await coleccion.doc(id).get();
+                if (doc.exists) {
+                    const j = doc.data();
+                    document.getElementById('jugadorId').value = id;
+                    document.getElementById('nombre').value = j.nombre;
+                    document.getElementById('posicion').value = j.posicion;
+                    document.getElementById('dorsal').value = j.dorsal;
+                    document.getElementById('nacionalidad').value = j.nacionalidad;
+                    document.getElementById('btnGuardar').textContent = 'Actualizar jugador';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (error) {
+                console.error(error);
+                mostrarMensaje('Error al cargar el jugador.', 'mensaje-error');
+            }
+        };
+
+        window.borrarJugador = async function(id) {
+            if (!confirm('¿Seguro que quieres borrar este jugador?')) return;
+            try {
+                await coleccion.doc(id).delete();
+                mostrarMensaje('Jugador eliminado.', 'mensaje-exito');
+                cargarJugadores();
+            } catch (error) {
+                console.error(error);
+                mostrarMensaje('Error al borrar.', 'mensaje-error');
+            }
+        };
+
+        cargarJugadores();
+    </script>
+
+</body>
+</html>
