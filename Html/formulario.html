@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario | Cloud Computing</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../Css/style.css">
 </head>
 <body class="form-body">
 
@@ -62,26 +62,12 @@
         &copy; 2026 Instituto Profesional Santo Tomás &mdash; Computación en la Nube
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAMuHX0poXiVeFpbWESF7Cq2vcDIpd1TQU",
-            authDomain: "cloudcomputing-5df45.firebaseapp.com",
-            projectId: "cloudcomputing-5df45",
-            storageBucket: "cloudcomputing-5df45.firebasestorage.app",
-            messagingSenderId: "335229660564",
-            appId: "1:335229660564:web:55c389fb811de4d0ab3381",
-            measurementId: "G-BRJJTJGVFV"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
         const form = document.getElementById('opinionForm');
         const mensaje = document.getElementById('mensaje');
+        const CLAVE = 'opiniones';
 
-        form.addEventListener('submit', async function(e) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const datos = {
@@ -92,16 +78,13 @@
                 fecha: new Date().toISOString()
             };
 
-            try {
-                await db.collection('opiniones').add(datos);
-                mensaje.textContent = '¡Voto registrado correctamente! La secta lo aprueba.';
-                mensaje.className = 'mensaje-exito';
-                form.reset();
-            } catch (error) {
-                console.error('Error al guardar:', error);
-                mensaje.textContent = 'Error al guardar. Verifica que Firestore esté habilitado.';
-                mensaje.className = 'mensaje-error';
-            }
+            const lista = JSON.parse(localStorage.getItem(CLAVE)) || [];
+            lista.push(datos);
+            localStorage.setItem(CLAVE, JSON.stringify(lista));
+
+            mensaje.textContent = '¡Voto registrado en localStorage! La secta lo aprueba.';
+            mensaje.className = 'mensaje-exito';
+            form.reset();
 
             setTimeout(() => {
                 mensaje.className = 'mensaje-oculto';
