@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votos | Cloud Computing</title>
+    <link rel="stylesheet" href="../Css/style.css">
+</head>
+<body>
+
+    <header>
+        <span class="brand">Cloud Computing</span>
+    </header>
+
+    <main>
+        <section class="card">
+            <h1>Votos guardados</h1>
+            <h2>Lista de opiniones en localStorage</h2>
+            <div id="votos"></div>
+            <a href="formulario.html" class="volver-link">Volver al formulario</a>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Instituto Profesional Santo Tomás &mdash; Computación en la Nube
+    </footer>
+
+    <script>
+        const contenedor = document.getElementById('votos');
+        const CLAVE = 'opiniones';
+
+        const lista = JSON.parse(localStorage.getItem(CLAVE)) || [];
+
+        if (lista.length === 0) {
+            contenedor.innerHTML = '<p>Aún no hay votos guardados.</p>';
+        } else {
+            let html = '<ul style="text-align:left;">';
+            lista.forEach(function(voto) {
+                html += '<li><strong>' + voto.nombre + '</strong> (' + voto.eleccion + ')<br>' +
+                        'Motivo: ' + voto.motivo + '</li>';
+            });
+            html += '</ul>';
+            contenedor.innerHTML = html;
+        }
+    </script>
+
+</body>
+</html>
