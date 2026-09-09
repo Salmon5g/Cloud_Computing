@@ -118,12 +118,18 @@
             });
         });
 
-        function validarFormulario() {
+        async function dorsalRegistrado(dorsal, idActual) {
+            const snap = await coleccion.where('dorsal', '==', dorsal).get();
+            return snap.docs.some(doc => doc.id !== idActual);
+        }
+
+        async function validarFormulario() {
             const inputNombre = document.getElementById('nombre');
             const inputPosicion = document.getElementById('posicion');
             const inputDorsal = document.getElementById('dorsal');
             const inputNacionalidad = document.getElementById('nacionalidad');
 
+            const idActual = document.getElementById('jugadorId').value;
             const nombre = inputNombre.value.trim();
             const posicion = inputPosicion.value.trim();
             const dorsal = inputDorsal.value.trim();
@@ -137,9 +143,19 @@
             ok = setError(inputPosicion, document.getElementById('posicionError'),
                 validarTexto(posicion, 2, 60), 'Ingresa una posición válida.') && ok;
 
+            const dorsalValido = /^(?:[1-9]|1[0-9]|2[0-9])$/.test(dorsal);
             ok = setError(inputDorsal, document.getElementById('dorsalError'),
-                /^(?:[1-9]|[1-9][0-9])$/.test(dorsal),
-                'El dorsal debe ser un número entre 1 y 99.') && ok;
+                dorsalValido, 'El dorsal debe ser un número entre 1 y 29.') && ok;
+
+            if (dorsalValido) {
+                try {
+                    const repetido = await dorsalRegistrado(dorsal, idActual);
+                    ok = setError(inputDorsal, document.getElementById('dorsalError'),
+                        !repetido, 'Ese dorsal ya está registrado, elige otro.') && ok;
+                } catch (error) {
+                    console.error(error);
+                }
+            }
 
             ok = setError(inputNacionalidad, document.getElementById('nacionalidadError'),
                 validarTexto(nacionalidad, 3, 60), 'Ingresa una nacionalidad válida.') && ok;
@@ -190,7 +206,7 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            if (!validarFormulario()) {
+            if (!(await validarFormulario())) {
                 mostrarMensaje('Corrige los campos marcados en rojo.', 'mensaje-error');
                 return;
             }

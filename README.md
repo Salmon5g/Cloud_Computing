@@ -31,7 +31,7 @@ Los formularios validan sus campos en el cliente (JavaScript) antes de guardar:
 **CRUD de jugadores**
 - **Nombre**: solo letras, entre 3 y 60 caracteres.
 - **Posición**: solo letras, entre 2 y 60 caracteres.
-- **Dorsal**: número entero entre 1 y 99.
+- **Dorsal**: número entero entre 1 y 29, y que no esté repetido entre los jugadores ya guardados en Firestore.
 - **Nacionalidad**: solo letras, entre 3 y 60 caracteres.
 
 Los campos inválidos se marcan en rojo con un mensaje de ayuda que desaparece al corregirlos.
