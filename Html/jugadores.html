@@ -23,21 +23,25 @@
                 <div class="form-group">
                     <label for="nombre">Nombre</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Ej: Lamine Yamal" required>
+                    <span id="nombreError" class="error-text"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="posicion">Posición</label>
                     <input type="text" id="posicion" name="posicion" placeholder="Ej: Extremo derecho" required>
+                    <span id="posicionError" class="error-text"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="dorsal">Dorsal</label>
                     <input type="text" id="dorsal" name="dorsal" placeholder="Ej: 19" required>
+                    <span id="dorsalError" class="error-text"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="nacionalidad">Nacionalidad</label>
                     <input type="text" id="nacionalidad" name="nacionalidad" placeholder="Ej: España" required>
+                    <span id="nacionalidadError" class="error-text"></span>
                 </div>
 
                 <button type="submit" class="btn-secta" id="btnGuardar">Guardar jugador</button>
@@ -95,6 +99,54 @@
         const mensaje = document.getElementById('mensaje');
         const cuerpo = document.getElementById('cuerpoTabla');
 
+        function validarTexto(valor, min, max) {
+            return /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ']+$/.test(valor) &&
+                   valor.length >= min && valor.length <= max;
+        }
+
+        function setError(input, span, valido, texto) {
+            input.classList.toggle('invalido', !valido);
+            span.textContent = valido ? '' : texto;
+            return valido;
+        }
+
+        form.querySelectorAll('input[type="text"]').forEach(el => {
+            el.addEventListener('input', function() {
+                el.classList.remove('invalido');
+                const span = document.getElementById(el.name + 'Error');
+                if (span) span.textContent = '';
+            });
+        });
+
+        function validarFormulario() {
+            const inputNombre = document.getElementById('nombre');
+            const inputPosicion = document.getElementById('posicion');
+            const inputDorsal = document.getElementById('dorsal');
+            const inputNacionalidad = document.getElementById('nacionalidad');
+
+            const nombre = inputNombre.value.trim();
+            const posicion = inputPosicion.value.trim();
+            const dorsal = inputDorsal.value.trim();
+            const nacionalidad = inputNacionalidad.value.trim();
+
+            let ok = true;
+
+            ok = setError(inputNombre, document.getElementById('nombreError'),
+                validarTexto(nombre, 3, 60), 'El nombre debe tener solo letras (mínimo 3).') && ok;
+
+            ok = setError(inputPosicion, document.getElementById('posicionError'),
+                validarTexto(posicion, 2, 60), 'Ingresa una posición válida.') && ok;
+
+            ok = setError(inputDorsal, document.getElementById('dorsalError'),
+                /^(?:[1-9]|[1-9][0-9])$/.test(dorsal),
+                'El dorsal debe ser un número entre 1 y 99.') && ok;
+
+            ok = setError(inputNacionalidad, document.getElementById('nacionalidadError'),
+                validarTexto(nacionalidad, 3, 60), 'Ingresa una nacionalidad válida.') && ok;
+
+            return ok;
+        }
+
         function mostrarMensaje(texto, tipo) {
             mensaje.textContent = texto;
             mensaje.className = tipo;
@@ -137,6 +189,11 @@
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            if (!validarFormulario()) {
+                mostrarMensaje('Corrige los campos marcados en rojo.', 'mensaje-error');
+                return;
+            }
 
             const datos = {
                 nombre: document.getElementById('nombre').value.trim(),

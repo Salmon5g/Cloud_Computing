@@ -21,14 +21,16 @@
                 <div class="form-group">
                     <label for="id">ID</label>
                     <input type="text" id="id" name="id" placeholder="Ej: 12345678-9" required>
+                    <span id="idError" class="error-text"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="nombre">Nombre de la persona</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required>
+                    <span id="nombreError" class="error-text"></span>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="radioGrupo">
                     <label>¿Raphinha debe mantenerse como el 9?</label>
                     <div class="radio-group">
                         <label class="radio-label">
@@ -42,11 +44,13 @@
                             No, debe salir
                         </label>
                     </div>
+                    <span id="eleccionError" class="error-text"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="motivo">Motivo</label>
                     <textarea id="motivo" name="motivo" rows="4" placeholder="Explica tu opinión..." required></textarea>
+                    <span id="motivoError" class="error-text"></span>
                 </div>
 
                 <button type="submit" class="btn-secta">La secta es inevitable</button>
@@ -71,14 +75,86 @@
         const mensaje = document.getElementById('mensaje');
         const CLAVE = 'opiniones';
 
+        function validarRut(rut) {
+            const limpio = rut.replace(/\./g, '').replace(/-/g, '');
+            if (!/^\d{1,8}[0-9Kk]$/.test(limpio)) return false;
+
+            const cuerpo = limpio.slice(0, -1);
+            const dvIngresado = limpio.slice(-1).toUpperCase();
+            let suma = 0;
+            let multiplo = 2;
+            for (let i = cuerpo.length - 1; i >= 0; i--) {
+                suma += parseInt(cuerpo.charAt(i), 10) * multiplo;
+                multiplo = multiplo === 7 ? 2 : multiplo + 1;
+            }
+            const resto = 11 - (suma % 11);
+            const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+            return dvEsperado === dvIngresado;
+        }
+
+        function setError(input, span, valido, texto) {
+            input.classList.toggle('invalido', !valido);
+            span.textContent = valido ? '' : texto;
+            return valido;
+        }
+
+        form.querySelectorAll('input, textarea').forEach(el => {
+            el.addEventListener('input', function() {
+                el.classList.remove('invalido');
+                const span = document.getElementById(el.name + 'Error') ||
+                             document.getElementById('eleccionError');
+                if (span) span.textContent = '';
+            });
+        });
+
+        document.querySelectorAll('input[name="eleccion"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('radioGrupo').classList.remove('invalido-grupo');
+                document.getElementById('eleccionError').textContent = '';
+            });
+        });
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
+            const inputId = document.getElementById('id');
+            const inputNombre = document.getElementById('nombre');
+            const inputMotivo = document.getElementById('motivo');
+            const eleccion = document.querySelector('input[name="eleccion"]:checked');
+
+            const id = inputId.value.trim();
+            const nombre = inputNombre.value.trim();
+            const motivo = inputMotivo.value.trim();
+
+            let ok = true;
+
+            ok = setError(inputId, document.getElementById('idError'),
+                validarRut(id), 'Ingresa un RUT válido (Ej: 12345678-9).') && ok;
+
+            ok = setError(inputNombre, document.getElementById('nombreError'),
+                /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]{3,80}$/.test(nombre),
+                'El nombre debe tener solo letras (mínimo 3).') && ok;
+
+            if (!eleccion) {
+                ok = false;
+                document.getElementById('radioGrupo').classList.add('invalido-grupo');
+                document.getElementById('eleccionError').textContent = 'Debes elegir una opción.';
+            }
+
+            ok = setError(inputMotivo, document.getElementById('motivoError'),
+                motivo.length >= 10, 'El motivo debe tener al menos 10 caracteres.') && ok;
+
+            if (!ok) {
+                mensaje.textContent = 'Corrige los campos marcados en rojo.';
+                mensaje.className = 'mensaje-error';
+                return;
+            }
+
             const datos = {
-                id: document.getElementById('id').value.trim(),
-                nombre: document.getElementById('nombre').value.trim(),
-                eleccion: document.querySelector('input[name="eleccion"]:checked').value,
-                motivo: document.getElementById('motivo').value.trim(),
+                id: id,
+                nombre: nombre,
+                eleccion: eleccion.value,
+                motivo: motivo,
                 fecha: new Date().toISOString()
             };
 
@@ -88,6 +164,7 @@
 
             mensaje.textContent = '¡Voto registrado en localStorage! La secta lo aprueba.';
             mensaje.className = 'mensaje-exito';
+            mensaje.classList.remove('mensaje-error');
             form.reset();
 
             setTimeout(() => {

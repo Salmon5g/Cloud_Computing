@@ -229,6 +229,32 @@
             font-weight: 600;
         }
 
+        /* ===== Validación de formularios ===== */
+        .error-text {
+            display: block;
+            color: #d93025;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.35rem;
+            min-height: 1rem;
+        }
+
+        .form-group input.invalido,
+        .form-group textarea.invalido {
+            border-color: #d93025;
+            background: #fce8e6;
+        }
+
+        .form-group input.invalido:focus,
+        .form-group textarea.invalido:focus {
+            border-color: #d93025;
+        }
+
+        .invalido-grupo .radio-label {
+            border-color: #d93025;
+            background: #fce8e6;
+        }
+
         .volver-link:hover {
             text-decoration: underline;
         }
