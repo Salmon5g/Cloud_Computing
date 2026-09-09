@@ -119,8 +119,13 @@
         });
 
         async function dorsalRegistrado(dorsal, idActual) {
-            const snap = await coleccion.where('dorsal', '==', dorsal).get();
-            return snap.docs.some(doc => doc.id !== idActual);
+            const snap = await coleccion.get();
+            const numeroDorsal = Number(dorsal);
+            return snap.docs.some(doc => {
+                if (doc.id === idActual) return false;
+                const existente = doc.data().dorsal;
+                return String(existente).trim() === dorsal || Number(existente) === numeroDorsal;
+            });
         }
 
         async function validarFormulario() {
@@ -148,12 +153,20 @@
                 dorsalValido, 'El dorsal debe ser un número entre 1 y 29.') && ok;
 
             if (dorsalValido) {
+                let repetido = false;
+                let errorConsulta = false;
                 try {
-                    const repetido = await dorsalRegistrado(dorsal, idActual);
-                    ok = setError(inputDorsal, document.getElementById('dorsalError'),
-                        !repetido, 'Ese dorsal ya está registrado, elige otro.') && ok;
+                    repetido = await dorsalRegistrado(dorsal, idActual);
                 } catch (error) {
                     console.error(error);
+                    errorConsulta = true;
+                }
+                if (errorConsulta) {
+                    ok = setError(inputDorsal, document.getElementById('dorsalError'),
+                        false, 'No se pudo verificar el dorsal. Revisa tu conexión.') && ok;
+                } else {
+                    ok = setError(inputDorsal, document.getElementById('dorsalError'),
+                        !repetido, 'Ese dorsal ya está registrado, elige otro.') && ok;
                 }
             }
 
